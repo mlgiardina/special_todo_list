@@ -4,6 +4,7 @@ class AddTodo < ActiveRecord::Migration
       t.string :entry, null: false
       t.boolean :completed, default: false
       t.integer :user_id, null: false
-      t.integer :todo_list_id, null: false
+      t.integer :todo_list_id
+    end
   end
 end
