@@ -42,7 +42,6 @@ class Get_It_Done
       exit
     else
       puts "That's not a valid option."
-      select_user
     end
   end
 
@@ -62,11 +61,13 @@ class Get_It_Done
     when "3"
       puts "Goodbye #{@user.name}!"
       @logged_in = false
+      @current_list = nil
+      @loaded_list = nil
     else
       puts "That's not a valid option."
       user_menu
     end
-    select_user
+    start
   end
 
   def load_user_todo_lists
@@ -81,15 +82,18 @@ class Get_It_Done
   end
 
   def display_todo_list
-    reset_loaded_list if @loaded_list
     system("clear")
-    puts "#{@current_list.list_name}"
-    @loaded_list.each do |item| puts "#{item.id} | #{item.entry }" + " | " +
-      if item.completed == false
-        "incomplete"
-      else
-        "complete"
+    if @loaded_list
+      puts "--#@current_list--"
+      @loaded_list.each do |item| puts "#{item.id} | #{item.entry }" + " | " +
+        if item.completed == false
+          "incomplete"
+        else
+          "complete"
+        end
       end
+    else
+      todo_list_menu
     end
   end
 
@@ -97,17 +101,17 @@ class Get_It_Done
     puts "Which list would you like to view? Or type 0 to go back."
     get_input
     if @input == "0"
-      user_menu
       @loaded_list = nil
       @current_list = nil
+      user_menu
     else
-      @current_list = Todo_List.find(@input)
+      @current_list = Todo_List.find(@input).list_name
     end
     reset_loaded_list
   end
 
   def reset_loaded_list
-    @loaded_list = Todo.where(todo_list_id: @current_list.list_name)
+    @loaded_list = Todo.where(todo_list_id: @current_list)
   end
 
   def todo_list_menu
@@ -152,7 +156,8 @@ class Get_It_Done
   def add_todo
     puts "Add your entry:"
     get_input
-    Todo.create(entry: @input, user_id: @user.id, todo_list_id: @current_list.list_name)
+    Todo.create(entry: @input, user_id: @user.id, todo_list_id: @current_list)
+    reset_loaded_list
   end
 
   def mark_todo_completed
@@ -177,7 +182,8 @@ class Get_It_Done
 
   def create_new_todo_list
     print "Name your list: "
-    Todo_List.create(list_name: get_input.to_s, user_id: @user.id, todo_id: @user.id)
+    Todo_List.create(list_name: get_input, user_id: @user.id, todo_id: @user.id)
+    @current_list = Todo_List.where(list_name: @input).first.list_name
     display_todo_list
     todo_list_menu
   end
