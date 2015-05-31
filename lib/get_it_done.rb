@@ -15,7 +15,6 @@ class Get_It_Done
     while @logged_in
       user_menu
     end
-    select_user
   end
 
   def welcome_message
@@ -29,7 +28,7 @@ class Get_It_Done
     case @input
     when "1"
       print "Enter your name: "
-      @user = User.find_or_create_by(name: get_input)
+      @user = User.find_or_create_by(name: get_input.to_s.downcase)
       @logged_in = true
     when "2"
       display_user_list
@@ -74,11 +73,102 @@ class Get_It_Done
     @todo_list.each do |item|
       puts "(#{item.id}) #{item.list_name}"
     end
+    select_todo_list
+    display_todo_list
+    todo_list_menu
+  end
+
+  def display_todo_list
+    system("clear")
+    reset_loaded_list
+    puts "#{@current_list.list_name}"
+    @loaded_list.each do |item| puts "#{item.id} | #{item.entry }" + " | " +
+      if item.completed == false
+        "incomplete"
+      else
+        "complete"
+      end
+    end
+  end
+
+  def select_todo_list
+    puts "Which list would you like to view?"
+    @current_list = Todo_List.find(get_input)
+    reset_loaded_list
+  end
+
+  def reset_loaded_list
+    @loaded_list = Todo.where(todo_list_id: @current_list.list_name)
+  end
+
+  def todo_list_menu
+    puts "\n\nWhat would you like to do?\n"
+    puts "(1) Add an entry"
+    puts "(2) Mark an entry as complete"
+    puts "(3) Delete an Entry"
+    puts "(4) Update an Entry"
+    puts "(5) Go back to your to to lists"
+    puts "(6) Exit"
+    get_input
+    case @input
+    when "1"
+      add_todo
+      display_todo_list
+      todo_list_menu
+    when "2"
+      mark_todo_completed
+      display_todo_list
+      todo_list_menu
+    when "3"
+      delete_todo
+      display_todo_list
+      todo_list_menu
+    when "4"
+      update_todo
+      display_todo_list
+      todo_list_menu
+    when "5"
+      load_user_todo_lists
+    when "6"
+      puts "Goodbye, #{@user.name}!"
+      sleep 1
+      exit
+    else
+      puts "That's not a valid option."
+      sleep 1
+      todo_list_menu
+    end
+  end
+
+  def add_todo
+    puts "Add your entry:"
+    get_input
+    Todo.create(entry: @input, user_id: @user.id, todo_list_id: @current_list.list_name)
+  end
+
+  def mark_todo_completed
+    puts "Which entry would you like to mark as completed?"
+    Todo.update(get_input, completed: true)
+  end
+
+  def delete_todo
+    puts "Which entry would you like to delete?"
+    get_input
+    Todo.delete(@input)
+  end
+
+  def update_todo
+    display_todo_list
+    puts "Which entry would you like to change?"
+    entry_to_change = get_input
+    puts "What would you like the entry to say?"
+    get_input
+    Todo.update(entry_to_change, entry: @input)
   end
 
   def create_new_todo_list
     print "Name your list: "
-    Todo_List.create(list_name: get_input, user_id: @user.id, todo_id: @user.id)
+    Todo_List.create(list_name: get_input.to_s, user_id: @user.id, todo_id: @user.id)
   end
 
   def get_input
