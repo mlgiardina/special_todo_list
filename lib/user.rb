@@ -1,4 +1,4 @@
 class User < ActiveRecord::Base
   has_many :todos
-  belongs_to :todo_list
+  has_many :todo_lists
 end
