@@ -84,6 +84,7 @@ class Get_It_Done
   def display_todo_list
     system("clear")
     if @loaded_list
+      # reset_loaded_list
       puts "--#@current_list--"
       @loaded_list.each do |item| puts "#{item.id} | #{item.entry }" + " | " +
         if item.completed == false
@@ -111,7 +112,7 @@ class Get_It_Done
   end
 
   def reset_loaded_list
-    @loaded_list = Todo.where(todo_list_id: @current_list)
+    @loaded_list = Todo.where(todo_list_id: @current_list).where(user_id: @user.id)
   end
 
   def todo_list_menu
@@ -163,12 +164,14 @@ class Get_It_Done
   def mark_todo_completed
     puts "Which entry would you like to mark as completed?"
     Todo.update(get_input, completed: true)
+    reset_loaded_list
   end
 
   def delete_todo
     puts "Which entry would you like to delete?"
     get_input
     Todo.delete(@input)
+    reset_loaded_list
   end
 
   def update_todo
@@ -178,6 +181,7 @@ class Get_It_Done
     puts "What would you like the entry to say?"
     get_input
     Todo.update(entry_to_change, entry: @input)
+    reset_loaded_list
   end
 
   def create_new_todo_list
