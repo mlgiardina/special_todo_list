@@ -15,6 +15,7 @@ class Get_It_Done
     while @logged_in
       user_menu
     end
+    exit
   end
 
   def welcome_message
@@ -65,6 +66,7 @@ class Get_It_Done
       puts "That's not a valid option."
       user_menu
     end
+    select_user
   end
 
   def load_user_todo_lists
@@ -79,8 +81,8 @@ class Get_It_Done
   end
 
   def display_todo_list
+    reset_loaded_list if @loaded_list
     system("clear")
-    reset_loaded_list
     puts "#{@current_list.list_name}"
     @loaded_list.each do |item| puts "#{item.id} | #{item.entry }" + " | " +
       if item.completed == false
@@ -92,8 +94,15 @@ class Get_It_Done
   end
 
   def select_todo_list
-    puts "Which list would you like to view?"
-    @current_list = Todo_List.find(get_input)
+    puts "Which list would you like to view? Or type 0 to go back."
+    get_input
+    if @input == "0"
+      user_menu
+      @loaded_list = nil
+      @current_list = nil
+    else
+      @current_list = Todo_List.find(@input)
+    end
     reset_loaded_list
   end
 
@@ -169,6 +178,8 @@ class Get_It_Done
   def create_new_todo_list
     print "Name your list: "
     Todo_List.create(list_name: get_input.to_s, user_id: @user.id, todo_id: @user.id)
+    display_todo_list
+    todo_list_menu
   end
 
   def get_input
