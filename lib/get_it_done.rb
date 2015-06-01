@@ -23,18 +23,26 @@ class Get_It_Done
     puts "Welcome to --Get It Done--"
   end
 
+  def new_user
+    print "Enter your name: "
+    @user = User.find_or_create_by(name: get_input.to_s.downcase)
+    @logged_in = true
+  end
+
+  def login
+    display_user_list
+    @user = User.find(get_input)
+    @logged_in = true
+  end
+
   def select_user
     puts "(1) New User\n(2) Login\n(3) Exit"
     get_input
     case @input
     when "1"
-      print "Enter your name: "
-      @user = User.find_or_create_by(name: get_input.to_s.downcase)
-      @logged_in = true
+      new_user
     when "2"
-      display_user_list
-      @user = User.find(get_input)
-      @logged_in = true
+      login
     when "3"
       puts "Goodbye!"
       sleep 1
